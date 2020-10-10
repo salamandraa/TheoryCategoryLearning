@@ -1,3 +1,5 @@
+package monoid
+
 trait Monoid[T] {
   def empty: T
 
@@ -25,16 +27,28 @@ object Monoid {
     override def combine(a: Seq[T], b: Seq[T]): Seq[T] = a ++ b
   }
 
+  private def combineOpt[T: Monoid](a: T, bOpt: Option[T]): T = {
+    bOpt match {
+      case Some(b) => implicitly(Monoid[T]).combine(a, b)
+      case None => a
+    }
+  }
+
   implicit def monoidOpt[T: Monoid]: Monoid[Option[T]] = new Monoid[Option[T]] {
     override def empty: Option[T] = None
 
     override def combine(aOpt: Option[T], bOpt: Option[T]): Option[T] = {
       aOpt -> bOpt match {
-        case (Some(a), Some(b)) => Some(implicitly(Monoid[T]).combine(a, b))
-        case (Some(_), None) => aOpt
+        case (Some(a), _) => Some(combineOpt(a, bOpt))
         case _ => bOpt
       }
     }
+  }
+
+  implicit def monoidTuple2[T1: Monoid, T2: Monoid]: Monoid[(T1, T2)] = new Monoid[(T1, T2)] {
+    override def empty: (T1, T2) = implicitly(Monoid[T1]).empty -> implicitly(Monoid[T2]).empty
+
+    override def combine(a: (T1, T2), b: (T1, T2)): (T1, T2) = implicitly(Monoid[T1]).combine(a._1, b._1) -> implicitly(Monoid[T2]).combine(a._2, b._2)
   }
 
 }
