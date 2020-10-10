@@ -9,6 +9,8 @@ trait Monoid[T] {
 object Monoid {
   def apply[T](implicit e: Monoid[T]): Monoid[T] = e
 
+  def combineAll[T](seq: Seq[T])(implicit im: Monoid[T]): T = seq.foldLeft(im.empty)(im.combine)
+
   implicit val monoidInt: Monoid[Int] = new Monoid[Int] {
     override def empty: Int = 0
 
@@ -21,7 +23,7 @@ object Monoid {
     override def combine(a: String, b: String): String = a + b
   }
 
-  implicit def monoidSeq[T: Monoid]: Monoid[Seq[T]] = new Monoid[Seq[T]] {
+  implicit def monoidSeq[T]: Monoid[Seq[T]] = new Monoid[Seq[T]] {
     override def empty: Seq[T] = Seq.empty[T]
 
     override def combine(a: Seq[T], b: Seq[T]): Seq[T] = a ++ b

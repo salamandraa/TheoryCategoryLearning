@@ -20,6 +20,7 @@ class MonoidSpec extends AnyFlatSpec with should.Matchers {
     Monoid[Seq[Option[Int]]].combine(Seq(Some(1)), Seq(Some(2))) shouldBe Seq(Some(1), Some(2))
     Monoid[(Int, String)].combine(1 -> "1", 2 -> "2") shouldBe 3 -> "12"
     Monoid[Seq[(Int, String)]].combine(Seq(1 -> "1"), Seq(2 -> "2")) shouldBe Seq(1 -> "1", 2 -> "2")
-
+    Monoid.combineAll(Seq("1", "2", "3")) shouldBe "123"
+    Monoid.combineAll(Seq(1, 2, 3)) shouldBe 6
   }
 }
