@@ -42,7 +42,7 @@ object Semigroup {
   implicit def semigroupMap[T1, T2](implicit e2: Semigroup[T2]): Semigroup[Map[T1, T2]] = (a: Map[T1, T2], b: Map[T1, T2]) => {
     a.foldLeft(b) { case (resMap, (key, value)) => resMap.get(key) match {
       case Some(valueThat) => resMap.updated(key, e2.combine(value, valueThat))
-      case None => resMap
+      case None => resMap + (key->value)
     }
     }
   }

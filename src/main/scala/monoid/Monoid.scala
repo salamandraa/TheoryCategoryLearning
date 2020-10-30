@@ -2,9 +2,15 @@ package monoid
 
 trait Monoid[T] extends Semigroup[T] {
   def empty: T
+
+  def combineAll(seq: Seq[T]): T = seq.foldLeft(this.empty)(this.combine)
 }
 
 object Monoid {
+  implicit class MonoidListFun[T](a: List[T]) {
+    def foldMap[R](f: T => R)(implicit im: Monoid[R]): R = a.foldLeft(im.empty)((res, value) => im.combine(res, f(value)))
+  }
+
   def apply[T](implicit e: Monoid[T]): Monoid[T] = e
 
   def combineAll[T](seq: Seq[T])(implicit im: Monoid[T]): T = seq.foldLeft(im.empty)(im.combine)
@@ -41,6 +47,12 @@ object Monoid {
     override def empty: (T1, T2) = e1.empty -> e2.empty
 
     override def combine(a: (T1, T2), b: (T1, T2)): (T1, T2) = Semigroup.semigroupTuple2(e1, e2).combine(a, b)
+  }
+
+  implicit def monoidMap[T1, T2](implicit e2: Monoid[T2]): Monoid[Map[T1, T2]] = new Monoid[Map[T1, T2]] {
+    override def empty: Map[T1, T2] = Map.empty
+
+    override def combine(a: Map[T1, T2], b: Map[T1, T2]): Map[T1, T2] = Semigroup.semigroupMap(e2).combine(a, b)
   }
 
 }
