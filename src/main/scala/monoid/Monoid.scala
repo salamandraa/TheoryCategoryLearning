@@ -6,8 +6,9 @@ trait Monoid[T] extends Semigroup[T] {
   def combineAll(seq: Seq[T]): T = seq.foldLeft(this.empty)(this.combine)
 }
 
-object Monoid {
-  implicit class MonoidListFun[T](a: List[T]) {
+object Monoid extends MonoidInstance {
+
+  implicit class MonoidListFun[T](a: Seq[T]) {
     def foldMap[R](f: T => R)(implicit im: Monoid[R]): R = a.foldLeft(im.empty)((res, value) => im.combine(res, f(value)))
   }
 
@@ -15,6 +16,9 @@ object Monoid {
 
   def combineAll[T](seq: Seq[T])(implicit im: Monoid[T]): T = seq.foldLeft(im.empty)(im.combine)
 
+}
+
+trait MonoidInstance {
   implicit val monoidInt: Monoid[Int] = new Monoid[Int] {
 
     override def combine(a: Int, b: Int): Int = Semigroup.semigroupInt.combine(a, b)

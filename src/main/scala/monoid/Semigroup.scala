@@ -4,7 +4,7 @@ trait Semigroup[T] {
   def combine(a: T, b: T): T
 }
 
-object Semigroup {
+object Semigroup extends SemigroupInstance {
 
   implicit class SemigroupFun[T: Semigroup](a: T) {
     def |+|(b: T): T = implicitly(Semigroup[T]).combine(a, b)
@@ -12,7 +12,9 @@ object Semigroup {
 
   def apply[T](implicit e: Semigroup[T]): Semigroup[T] = e
 
+}
 
+trait SemigroupInstance {
   implicit val semigroupInt: Semigroup[Int] = (a: Int, b: Int) => a + b
 
   implicit val semigroupString: Semigroup[String] = (a: String, b: String) => a + b
@@ -42,7 +44,7 @@ object Semigroup {
   implicit def semigroupMap[T1, T2](implicit e2: Semigroup[T2]): Semigroup[Map[T1, T2]] = (a: Map[T1, T2], b: Map[T1, T2]) => {
     a.foldLeft(b) { case (resMap, (key, value)) => resMap.get(key) match {
       case Some(valueThat) => resMap.updated(key, e2.combine(value, valueThat))
-      case None => resMap + (key->value)
+      case None => resMap + (key -> value)
     }
     }
   }
