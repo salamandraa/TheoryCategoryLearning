@@ -1,18 +1,19 @@
+package monoid
 
 
 
-import org.scalatest.flatspec.AnyFlatSpec
+
 import org.scalatest._
-import matchers._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers._
 
 
 //import cats.Monoid
 //import cats.implicits._
 
-class SemigroupSpec extends AnyFlatSpec with should.Matchers {
+class   SemigroupSpec extends AnyFlatSpec with should.Matchers {
 
   it should "test from https://www.scala-exercises.org/cats/semigroup" in {
-    import monoid.Semigroup
     import monoid.Semigroup._
 
     Semigroup[Int].combine(1, 2) should be(3)

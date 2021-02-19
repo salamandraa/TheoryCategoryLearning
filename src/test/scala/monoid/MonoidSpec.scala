@@ -1,10 +1,11 @@
+package monoid
 
 
 
-import org.scalatest.flatspec.AnyFlatSpec
+
 import org.scalatest._
-import matchers._
-import monoid.Monoid
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers._
 
 class MonoidSpec extends AnyFlatSpec with should.Matchers {
 
