@@ -1,6 +1,9 @@
 package enheritance
 
 trait RunnableOOP[T] {
+  /**
+   * fun for public using
+   */
   def run(t: T): String
 }
 

@@ -1,7 +1,9 @@
 package enheritance
 
 object RunnableFP {
-
+  /**
+   * fun for public using
+   */
   def run[T](t: T)(implicit context: RunnableLikeFp[T]): String = context.run(t)
 
   trait RunnableLikeFp[T] {
