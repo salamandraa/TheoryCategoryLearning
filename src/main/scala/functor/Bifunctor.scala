@@ -5,6 +5,14 @@ trait Bifunctor[F[_, _]] {
 
   def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D]
 
+  def leftFunctor[X]: Functor[F[*, X]] = new Functor[λ[a => F[a, X]]] {
+    override def map[A, B](fa: F[A, X])(f: A => B): F[B, X] = bimap(fa)(f, identity)
+  }
+
+  def rightFunctor[X]: Functor[λ[b => F[X, b]]] = new Functor[F[X, *]] {
+    override def map[A, B](fa: F[X, A])(f: A => B): F[X, B] = bimap(fa)(identity, f)
+  }
+
   def compose[G[_, _]](implicit bifunctorG: Bifunctor[G]): Bifunctor[λ[(a, b) => F[G[a, b], G[a, b]]]] = new Bifunctor.ComposeBifunctor[F, G] {
     override def F: Bifunctor[F] = self
 
