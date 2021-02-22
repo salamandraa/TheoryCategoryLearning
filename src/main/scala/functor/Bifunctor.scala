@@ -1,11 +1,29 @@
 package functor
 
 trait Bifunctor[F[_, _]] {
+  self =>
 
   def bimap[A, B, C, D](fab: F[A, B])(f: A => C, g: B => D): F[C, D]
+
+  def compose[G[_, _]](implicit bifunctorG: Bifunctor[G]): Bifunctor[λ[(a, b) => F[G[a, b], G[a, b]]]] = new Bifunctor.ComposeBifunctor[F, G] {
+    override def F: Bifunctor[F] = self
+
+    override def G: Bifunctor[G] = bifunctorG
+  }
 }
 
 object Bifunctor extends BifunctorInstance {
+
+  trait ComposeBifunctor[F[_, _], G[_, _]] extends Bifunctor[λ[(a, b) => F[G[a, b], G[a, b]]]] {
+    def F: Bifunctor[F]
+
+    def G: Bifunctor[G]
+
+    override def bimap[A, B, C, D](fab: F[G[A, B], G[A, B]])(f: A => C, g: B => D): F[G[C, D], G[C, D]] = {
+      F.bimap(fab)(gab1 => G.bimap(gab1)(f, g), gab2 => G.bimap(gab2)(f, g))
+    }
+  }
+
   def apply[F[_, _]](implicit bifunctor: Bifunctor[F]): Bifunctor[F] = bifunctor
 }
 

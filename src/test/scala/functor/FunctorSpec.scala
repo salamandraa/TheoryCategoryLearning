@@ -45,6 +45,9 @@ class FunctorSpec extends AnyFlatSpec with should.Matchers {
     Bifunctor[Map].bimap(Map((1, "1")))(_.toString, _.toInt) should be(Map(("1", 1)))
     Bifunctor[Either].bimap(Left[Int, String](1))(_.toString, _.toInt) should be(Left("1"))
     Bifunctor[Either].bimap(Right[Int, String]("1"))(_.toString, _.toInt) should be(Right(1))
+    Bifunctor[Tuple2].compose[Either].bimap((Left(1), Right("1")))(_.toString, _.toInt) shouldBe(Left("1"), Right(1))
+    Bifunctor[Either].compose[Tuple2].bimap(Left((1, "1")))(_.toString, _.toInt) shouldBe Left(("1", 1))
+    Bifunctor[Tuple2].compose[Tuple2].bimap(((1, "2"), (3, "4")))(_.toString, _.toInt) shouldBe(("1", 2), ("3", 4))
   }
 
 }
