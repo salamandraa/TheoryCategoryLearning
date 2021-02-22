@@ -4,6 +4,7 @@ version := "1.0"
 
 scalaVersion := "2.13.3"
 
+addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.3" cross CrossVersion.full)
 
 libraryDependencies ++= Seq(
  "org.scalactic" %% "scalactic" % "3.2.0",

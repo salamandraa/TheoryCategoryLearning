@@ -1,6 +1,6 @@
 package functor
 
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 trait Functor[F[_]] {
   self =>
@@ -11,23 +11,24 @@ trait Functor[F[_]] {
   def fproduct[A, B](fa: F[A])(f: A => B): F[(A, B)] = map(fa)(a => a -> f(a))
 
 
-  def compose[G[_]](implicit functorRight: Functor[G]) = ???
+  def compose[G[_]](implicit functorG: Functor[G]): Functor[λ[α => F[G[α]]]] = new Functor.ComposeFunctor[F, G] {
+    override def F: Functor[F] = self
+
+    override def G: Functor[G] = functorG
+  }
 }
 
 object Functor extends FunctorInstance {
 
-  //todo fix not work F[G[_]] takes no type parameters, expected: 1
-  //[error]   trait ComposeFunctor[G[_],F[_]] extends Functor[F[G[_]]] {
-//  trait ComposeFunctor[G[_],F[_]] extends Functor[F[G[_]]] {
-//    def F: Functor[F]
-//
-//    def G: Functor[G]
-//
-//
-//    override def map[A, B](fga: F[G[A]])(f: A => B): F[G[B]] = {
-//      F.map(fga)(ga => G.map(ga)(f))
-//    }
-//  }
+  trait ComposeFunctor[F[_], G[_]] extends Functor[λ[α => F[G[α]]]] {
+    def F: Functor[F]
+
+    def G: Functor[G]
+
+    override def map[A, B](fga: F[G[A]])(f: A => B): F[G[B]] = {
+      F.map(fga)(ga => G.map(ga)(f))
+    }
+  }
 
   def apply[F[_]](implicit e: Functor[F]): Functor[F] = e
 }
@@ -47,7 +48,10 @@ trait FunctorInstance {
   }
 
   implicit val functorOpt: Functor[Option] = new Functor[Option] {
-    override def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa.map(f)
+    override def map[A, B](fa: Option[A])(f: A => B): Option[B] = fa match {
+      case Some(value) => Some(f(value))
+      case None => None
+    }
   }
 
   implicit val functorSet: Functor[Set] = new Functor[Set] {
@@ -55,6 +59,9 @@ trait FunctorInstance {
   }
 
   implicit val functorTry: Functor[Try] = new Functor[Try] {
-    override def map[A, B](fa: Try[A])(f: A => B): Try[B] = fa.map(f)
+    override def map[A, B](fa: Try[A])(f: A => B): Try[B] = fa match {
+      case Failure(exception) => Failure(exception)
+      case Success(value) => Success(f(value))
+    }
   }
 }

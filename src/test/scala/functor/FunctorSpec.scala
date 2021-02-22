@@ -13,6 +13,7 @@ class FunctorSpec extends AnyFlatSpec with should.Matchers {
     Functor[Seq].map(Seq("Hello", ""))(_.length) should be(Seq(5, 0))
     Functor[Seq].map(List("Hello", ""))(_.length) should be(List(5, 0))
     Functor[List].map(List("Hello", ""))(_.length) should be(List(5, 0))
+    Functor[List].map(List("left" -> "right"))(_._2) should be(List("right"))
   }
 
   it should "test from https://www.scala-exercises.org/cats/functor" in {
@@ -33,12 +34,9 @@ class FunctorSpec extends AnyFlatSpec with should.Matchers {
     product.get("Cats").getOrElse(0) should be(4)
     product.get("is").getOrElse(0) should be(2)
     product.get("awesome").getOrElse(0) should be(7)
-//    cats.Functor[List].compose
-//
-//    val listOpt = Functor[List] compose Functor[Option]
-//    listOpt.map(List(Some(1), None, Some(3)))(_ + 1) should be(
-//      List(Some(2), None, Some(4))
-//    )
+
+    val listOpt: Functor[λ[α => List[Option[α]]]] = Functor[List] compose Functor[Option]
+    listOpt.map(List(Some(1), None, Some(3)))(_ + 1) should be(List(Some(2), None, Some(4)))
   }
 
 }
