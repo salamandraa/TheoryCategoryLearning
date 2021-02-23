@@ -1,5 +1,6 @@
 package functor
 
+import data.Const
 import data.Id.Id
 import data.Reader
 
@@ -38,6 +39,10 @@ object Functor extends FunctorInstance {
 
 
 trait FunctorInstance {
+
+  implicit def functorConst[C]: Functor[Const[C, *]] = new Functor[Const[C, *]] {
+    override def map[A, B](fa: Const[C, A])(f: A => B): Const[C, B] = Const(fa.value)
+  }
 
   implicit def functorReader[T]: Functor[Reader[T, *]] = new Functor[Reader[T, *]] {
     override def map[A, B](fa: Reader[T, A])(f: A => B): Reader[T, B] = Reader(f.compose(fa.fun))
