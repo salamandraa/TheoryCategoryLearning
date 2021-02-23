@@ -1,6 +1,7 @@
 package functor
 
 
+import data.Reader
 import functor.Functor
 import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
@@ -52,6 +53,16 @@ class FunctorSpec extends AnyFlatSpec with should.Matchers {
     leftFunctor.map((1, "2"))(_ - 1) shouldBe(0, "2")
     val rightFunctor: Functor[(Int, *)] = Bifunctor[Tuple2].rightFunctor
     rightFunctor.map((1, "2"))(_.toInt) shouldBe ((1, 2))
+  }
+
+  it should "functor reader test" in {
+    import Functor._
+
+    val fun: Int => String = Functor[Int => *].map(_ + 1)(_.toString)
+    fun(2) shouldBe "3"
+
+    val fun2: Reader[Int, String] = Functor[Reader[Int, *]].map(Reader(_ + 1))(_.toString)
+    fun2(2) shouldBe "3"
   }
 
 }

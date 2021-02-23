@@ -1,5 +1,8 @@
 package functor
 
+import data.Id.Id
+import data.Reader
+
 import scala.util.{Failure, Success, Try}
 
 trait Functor[F[_]] {
@@ -35,6 +38,18 @@ object Functor extends FunctorInstance {
 
 
 trait FunctorInstance {
+
+  implicit def functorReader[T]: Functor[Reader[T, *]] = new Functor[Reader[T, *]] {
+    override def map[A, B](fa: Reader[T, A])(f: A => B): Reader[T, B] = Reader(f.compose(fa.fun))
+  }
+
+  implicit def functorReaderAsFunction[T]: Functor[Function[T, *]] = new Functor[T => *] {
+    override def map[A, B](fa: T => A)(f: A => B): T => B = f.compose(fa)
+  }
+
+  implicit val functorId: Functor[Id] = new Functor[Id] {
+    override def map[A, B](fa: Id[A])(f: A => B): Id[B] = f(fa)
+  }
 
   /**
    * example infer Functor[List]

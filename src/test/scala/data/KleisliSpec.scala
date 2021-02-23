@@ -1,10 +1,9 @@
+package data
 
 
-
-import data.Kleisli
-import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest._
-import matchers._
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers._
 
 
 //import cats.Monoid
