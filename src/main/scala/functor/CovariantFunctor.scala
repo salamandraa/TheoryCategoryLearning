@@ -87,3 +87,23 @@ trait FunctorInstance {
     }
   }
 }
+
+trait FunctorCheck {
+  def identityFunctor[F[_] : CovariantFunctor, A](fa: F[A]): Boolean = identityFunctorLeft(fa) == identityFunctorRight(fa)
+
+  def identityFunctorLeft[F[_] : CovariantFunctor, A](fa: F[A]): F[A] = identity(fa)
+
+  def identityFunctorRight[F[_] : CovariantFunctor, A](fa: F[A]): F[A] = implicitly[CovariantFunctor[F]].map(fa)(identity)
+
+  def compositionFunctor[F[_] : CovariantFunctor, A, B, C](fa: F[A])(f: A => B)(g: B => C): Boolean = compositionFunctorLeft(fa)(f)(g) == compositionFunctorRight(fa)(f)(g)
+
+  private def compositionFunctorLeft[F[_] : CovariantFunctor, A, B, C](fa: F[A])(f: A => B)(g: B => C): F[C] = {
+    val functor = implicitly[CovariantFunctor[F]]
+    functor.map(functor.map(fa)(f))(g)
+  }
+
+  private def compositionFunctorRight[F[_] : CovariantFunctor, A, B, C](fa: F[A])(f: A => B)(g: B => C): F[C] = {
+    val functor = implicitly[CovariantFunctor[F]]
+    functor.map(fa)(g.compose(f))
+  }
+}

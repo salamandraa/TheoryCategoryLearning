@@ -6,7 +6,42 @@ import data.{Const, Reader}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
 
-class CovariantFunctorSpec extends AnyFlatSpec with should.Matchers {
+import scala.util.Try
+
+class CovariantFunctorSpec extends AnyFlatSpec with should.Matchers with FunctorCheck {
+
+  it should "rules" in {
+
+    import data.Id.Id
+    identityFunctor[Id, Int](10) shouldBe true
+    compositionFunctor[Id, Int, Double, String](10)(_.toDouble)(_.toString) shouldBe true
+
+    identityFunctor(List(10, 20)) shouldBe true
+    identityFunctor(List.empty[Int]) shouldBe true
+    compositionFunctor(List(10, 20))(_.toDouble)(_.toString) shouldBe true
+    compositionFunctor(List.empty[Int])(_.toDouble)(_.toString) shouldBe true
+
+    identityFunctor(Seq(10, 20)) shouldBe true
+    identityFunctor(Seq.empty[Int]) shouldBe true
+    compositionFunctor(Seq(10, 20))(_.toDouble)(_.toString) shouldBe true
+    compositionFunctor(Seq.empty[Int])(_.toDouble)(_.toString) shouldBe true
+
+    identityFunctor(Option(10)) shouldBe true
+    identityFunctor(Option.empty[Int]) shouldBe true
+    compositionFunctor(Option(10))(_.toDouble)(_.toString) shouldBe true
+    compositionFunctor(Option.empty[Int])(_.toDouble)(_.toString) shouldBe true
+
+    identityFunctor(Set(10, 20)) shouldBe true
+    identityFunctor(Set.empty[Int]) shouldBe true
+    compositionFunctor(Set(10, 20))(_.toDouble)(_.toString) shouldBe true
+    compositionFunctor(Set.empty[Int])(_.toDouble)(_.toString) shouldBe true
+
+    Try(10 / 0).isFailure shouldBe true
+    identityFunctor(Try(10)) shouldBe true
+    identityFunctor(Try(10 / 0)) shouldBe true
+    compositionFunctor(Try(10))(_.toDouble)(_.toString) shouldBe true
+    compositionFunctor(Try(10 / 0))(_.toDouble)(_.toString) shouldBe true
+  }
 
   it should "check diffrent types" in {
     CovariantFunctor[Seq].map(Seq("Hello", ""))(_.length) should be(Seq(5, 0))
@@ -36,7 +71,6 @@ class CovariantFunctorSpec extends AnyFlatSpec with should.Matchers {
     val listOpt: CovariantFunctor[λ[α => List[Option[α]]]] = CovariantFunctor[List] compose CovariantFunctor[Option]
     listOpt.map(List(Some(1), None, Some(3)))(_ + 1) should be(List(Some(2), None, Some(4)))
   }
-
 
 
   it should "functor reader test" in {
