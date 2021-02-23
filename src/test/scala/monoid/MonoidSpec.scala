@@ -3,11 +3,12 @@ package monoid
 
 
 
-import org.scalatest._
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
 
 class MonoidSpec extends AnyFlatSpec with should.Matchers {
+
+  import monoid.Monoid._
 
   it should "check diffrent types" in {
     Monoid[Int].combine(1, 2) shouldBe 3
@@ -26,7 +27,6 @@ class MonoidSpec extends AnyFlatSpec with should.Matchers {
   }
 
   it should "test from https://www.scala-exercises.org/cats/monoid" in {
-    import monoid.Monoid._
 
     Monoid[String].empty should be("")
     Monoid[String].combineAll(List("a", "b", "c")) should be("abc")

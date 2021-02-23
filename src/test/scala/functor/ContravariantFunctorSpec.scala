@@ -7,7 +7,6 @@ class ContravariantFunctorSpec extends AnyFlatSpec with should.Matchers {
 
   it should "contravariant" in {
     import data.Op.Op
-    import functor.ContravariantFunctor._
 
     val doubleToInt: Op[Int, Double] = ContravariantFunctor[Op[Int, *]].contramap((x: String) => x.toInt)((x: Double) => x.toInt.toString)
 
