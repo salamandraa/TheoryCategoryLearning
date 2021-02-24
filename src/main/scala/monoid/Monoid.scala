@@ -60,3 +60,7 @@ trait MonoidInstance {
   }
 
 }
+
+trait MonoidLaws {
+  //todo add laws
+}
