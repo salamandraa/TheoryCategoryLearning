@@ -16,12 +16,36 @@ trait ContravariantInstance {
   }
 
 
-  implicit val functorOrdering: ContravariantFunctor[Ordering] = new ContravariantFunctor[Ordering] {
+  implicit def functorOrdering[T]: ContravariantFunctor[Ordering] = new ContravariantFunctor[Ordering[*]] {
     override def contramap[A, B](c: Ordering[A])(f: B => A): Ordering[B] = c.on(f)
   }
 
-  implicit val functorEquiv: ContravariantFunctor[Equiv] = new ContravariantFunctor[Equiv] {
+  implicit def functorEquiv[T]: ContravariantFunctor[Equiv] = new ContravariantFunctor[Equiv[*]] {
     override def contramap[A, B](c: Equiv[A])(f: B => A): Equiv[B] = Equiv.fromFunction[B] { case (l, r) => c.equiv(f(l), f(r)) }
+  }
+}
+
+trait ContravariantFunctorLaws {
+  def identityLaw[F[_] : ContravariantFunctor, A](fa: F[A]): Boolean = {
+    val left = identityLawLeft(fa)
+    val right = identityLawRight(fa)
+    left == right && left == fa
+  }
+
+  def identityLawLeft[F[_] : ContravariantFunctor, A](fa: F[A]): F[A] = identity(fa)
+
+  def identityLawRight[F[_] : ContravariantFunctor, A](fa: F[A]): F[A] = implicitly[ContravariantFunctor[F]].contramap(fa)(identity)
+
+  def compositionLaw[F[_] : ContravariantFunctor, A, B, C](fa: F[A])(f: B => A)(g: C => B): Boolean = compositionLawLeft(fa)(f)(g) == compositionLawRight(fa)(f)(g)
+
+  def compositionLawLeft[F[_] : ContravariantFunctor, A, B, C](fa: F[A])(f: B => A)(g: C => B): F[C] = {
+    val functor = implicitly[ContravariantFunctor[F]]
+    functor.contramap(functor.contramap(fa)(f))(g)
+  }
+
+  def compositionLawRight[F[_] : ContravariantFunctor, A, B, C](fa: F[A])(f: B => A)(g: C => B): F[C] = {
+    val functor = implicitly[ContravariantFunctor[F]]
+    functor.contramap(fa)(f.compose(g))
   }
 }
 
