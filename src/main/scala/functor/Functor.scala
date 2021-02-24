@@ -89,7 +89,11 @@ trait FunctorInstance {
 }
 
 trait FunctorLaws {
-  def identityLaw[F[_] : Functor, A](fa: F[A]): Boolean = identityLawLeft(fa) == identityLawRight(fa)
+  def identityLaw[F[_] : Functor, A](fa: F[A]): Boolean = {
+    val left = identityLawLeft(fa)
+    val right = identityLawRight(fa)
+    left == right && left == fa
+  }
 
   def identityLawLeft[F[_] : Functor, A](fa: F[A]): F[A] = identity(fa)
 

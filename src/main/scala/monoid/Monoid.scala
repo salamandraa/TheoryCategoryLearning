@@ -62,5 +62,31 @@ trait MonoidInstance {
 }
 
 trait MonoidLaws {
-  //todo add laws
+  def identityLaw[A: Monoid](a: A): Boolean = {
+    val left = identityLawLeft(a)
+    val right = identityLawRight(a)
+    left == right && left == a
+  }
+
+  def identityLawLeft[A: Monoid](a: A): A = {
+    val monoid = implicitly[Monoid[A]]
+    monoid.combine(monoid.empty, a)
+  }
+
+  def identityLawRight[A: Monoid](a: A): A = {
+    val monoid = implicitly[Monoid[A]]
+    monoid.combine(a, monoid.empty)
+  }
+
+  def compositionLaw[A: Monoid](a: A, b: A, c: A): Boolean = compositionLawLeft(a, b, c) == compositionLawRight(a, b, c)
+
+  def compositionLawLeft[A: Monoid](a: A, b: A, c: A): A = {
+    val monoid = implicitly[Monoid[A]]
+    monoid.combine(monoid.combine(a, b), c)
+  }
+
+  def compositionLawRight[A: Monoid](a: A, b: A, c: A): A = {
+    val monoid = implicitly[Monoid[A]]
+    monoid.combine(a, monoid.combine(b, c))
+  }
 }

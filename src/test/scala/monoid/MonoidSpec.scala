@@ -1,14 +1,39 @@
 package monoid
 
 
-
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
+import sun.awt.SunToolkit.OperationTimedOut
 
-class MonoidSpec extends AnyFlatSpec with should.Matchers {
+class MonoidSpec extends AnyFlatSpec with should.Matchers with MonoidLaws {
 
   import monoid.Monoid._
+
+  it should "laws" in {
+
+    identityLaw(2) shouldBe true
+    compositionLaw(2, 3, 4) shouldBe true
+
+    identityLaw("hello") shouldBe true
+    compositionLaw("a", "b", "c") shouldBe true
+
+    identityLaw(Seq(1, 2)) shouldBe true
+    compositionLaw(Seq(1, 2), Seq(3, 4), Seq(5)) shouldBe true
+
+    identityLaw(Option(1)) shouldBe true
+    identityLaw(Option.empty[Int]) shouldBe true
+    compositionLaw(Option(1), Some(2), Some(5)) shouldBe true
+    compositionLaw(Option(1), None, None) shouldBe true
+    compositionLaw(Option.empty[Int], None, None) shouldBe true
+
+
+    identityLaw((2, "hello")) shouldBe true
+    compositionLaw((2, "a"), (3, "b"), (4, "c")) shouldBe true
+
+    identityLaw(Map("a" -> 1, "b" -> 2, "a" -> 3)) shouldBe true
+    compositionLaw(Map("a" -> 1), Map("b" -> 2, "a" -> 10), Map("a" -> 3)) shouldBe true
+
+  }
 
   it should "check diffrent types" in {
     Monoid[Int].combine(1, 2) shouldBe 3
