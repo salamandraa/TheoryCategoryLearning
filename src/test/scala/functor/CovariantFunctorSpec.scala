@@ -8,39 +8,51 @@ import org.scalatest.matchers._
 
 import scala.util.Try
 
-class CovariantFunctorSpec extends AnyFlatSpec with should.Matchers with FunctorCheck {
+class CovariantFunctorSpec extends AnyFlatSpec with should.Matchers with FunctorLaw {
 
-  it should "rules" in {
+  it should "laws" in {
+
+    identityLaw(Const(List(10, 20))) shouldBe true
+    identityLaw(Const((): Unit)) shouldBe true
+    compositionLaw(Const(List(10, 20)))(_.hashCode())(_.toString) shouldBe true
+    compositionLaw(Const((): Unit))(_.hashCode())(_.toString) shouldBe true
+
+
+    identityLawLeft(Reader((x: Double) => x.toInt.toString)).apply(10.0) shouldBe identityLawRight(Reader((x: Double) => x.toInt.toString)).apply(10.0)
+    compositionLawLeft(Reader((x: Double) => x.toInt.toString))(_.toInt)(_.toLong).apply(10.0) shouldBe compositionLawRight(Reader((x: Double) => x.toInt.toString))(_.toInt)(_.toLong).apply(10.0)
+
+    identityLawLeft((x: Double) => x.toInt.toString).apply(10.0) shouldBe identityLawRight((x: Double) => x.toInt.toString).apply(10.0)
+    compositionLawLeft((x: Double) => x.toInt.toString)(_.toInt)(_.toLong).apply(10.0) shouldBe compositionLawRight((x: Double) => x.toInt.toString)(_.toInt)(_.toLong).apply(10.0)
 
     import data.Id.Id
-    identityFunctor[Id, Int](10) shouldBe true
-    compositionFunctor[Id, Int, Double, String](10)(_.toDouble)(_.toString) shouldBe true
+    identityLaw[Id, Int](10) shouldBe true
+    compositionLaw[Id, Int, Double, String](10)(_.toDouble)(_.toString) shouldBe true
 
-    identityFunctor(List(10, 20)) shouldBe true
-    identityFunctor(List.empty[Int]) shouldBe true
-    compositionFunctor(List(10, 20))(_.toDouble)(_.toString) shouldBe true
-    compositionFunctor(List.empty[Int])(_.toDouble)(_.toString) shouldBe true
+    identityLaw(List(10, 20)) shouldBe true
+    identityLaw(List.empty[Int]) shouldBe true
+    compositionLaw(List(10, 20))(_.toDouble)(_.toString) shouldBe true
+    compositionLaw(List.empty[Int])(_.toDouble)(_.toString) shouldBe true
 
-    identityFunctor(Seq(10, 20)) shouldBe true
-    identityFunctor(Seq.empty[Int]) shouldBe true
-    compositionFunctor(Seq(10, 20))(_.toDouble)(_.toString) shouldBe true
-    compositionFunctor(Seq.empty[Int])(_.toDouble)(_.toString) shouldBe true
+    identityLaw(Seq(10, 20)) shouldBe true
+    identityLaw(Seq.empty[Int]) shouldBe true
+    compositionLaw(Seq(10, 20))(_.toDouble)(_.toString) shouldBe true
+    compositionLaw(Seq.empty[Int])(_.toDouble)(_.toString) shouldBe true
 
-    identityFunctor(Option(10)) shouldBe true
-    identityFunctor(Option.empty[Int]) shouldBe true
-    compositionFunctor(Option(10))(_.toDouble)(_.toString) shouldBe true
-    compositionFunctor(Option.empty[Int])(_.toDouble)(_.toString) shouldBe true
+    identityLaw(Option(10)) shouldBe true
+    identityLaw(Option.empty[Int]) shouldBe true
+    compositionLaw(Option(10))(_.toDouble)(_.toString) shouldBe true
+    compositionLaw(Option.empty[Int])(_.toDouble)(_.toString) shouldBe true
 
-    identityFunctor(Set(10, 20)) shouldBe true
-    identityFunctor(Set.empty[Int]) shouldBe true
-    compositionFunctor(Set(10, 20))(_.toDouble)(_.toString) shouldBe true
-    compositionFunctor(Set.empty[Int])(_.toDouble)(_.toString) shouldBe true
+    identityLaw(Set(10, 20)) shouldBe true
+    identityLaw(Set.empty[Int]) shouldBe true
+    compositionLaw(Set(10, 20))(_.toDouble)(_.toString) shouldBe true
+    compositionLaw(Set.empty[Int])(_.toDouble)(_.toString) shouldBe true
 
     Try(10 / 0).isFailure shouldBe true
-    identityFunctor(Try(10)) shouldBe true
-    identityFunctor(Try(10 / 0)) shouldBe true
-    compositionFunctor(Try(10))(_.toDouble)(_.toString) shouldBe true
-    compositionFunctor(Try(10 / 0))(_.toDouble)(_.toString) shouldBe true
+    identityLaw(Try(10)) shouldBe true
+    identityLaw(Try(10 / 0)) shouldBe true
+    compositionLaw(Try(10))(_.toDouble)(_.toString) shouldBe true
+    compositionLaw(Try(10 / 0))(_.toDouble)(_.toString) shouldBe true
   }
 
   it should "check diffrent types" in {
