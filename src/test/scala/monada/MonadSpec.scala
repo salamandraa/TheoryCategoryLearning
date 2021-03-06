@@ -3,7 +3,7 @@ package monada
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
-class MonadaSpec extends AnyFlatSpec with should.Matchers {
+class MonadSpec extends AnyFlatSpec with should.Matchers {
 
 
   it should "laws" in {

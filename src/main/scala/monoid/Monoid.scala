@@ -16,10 +16,21 @@ object Monoid extends MonoidInstance {
 
   def combineAll[T](seq: Seq[T])(implicit im: Monoid[T]): T = seq.foldLeft(im.empty)(im.combine)
 
+  implicit class MonoidIndexedSeqFun[A](v: IndexedSeq[A]) {
+    //    EXERCISE 10.7
+    def foldMapV[B](f: A => B)(implicit m: Monoid[B]): B = {
+      if (v.size <= 1) v.headOption.map(f).getOrElse(m.empty)
+      else {
+        val (l, r) = v.splitAt(v.size / 2)
+        m.combine(l.foldMapV(f), r.foldMapV(f))
+      }
+    }
+  }
+
 }
 
 trait MonoidInstance {
-  implicit val monoidInt: Monoid[Int] = new Monoid[Int] {
+  implicit val monoidIntSum: Monoid[Int] = new Monoid[Int] {
 
     override def combine(a: Int, b: Int): Int = Semigroup.semigroupInt.combine(a, b)
 
@@ -40,7 +51,7 @@ trait MonoidInstance {
   }
 
 
-  implicit def monoidOpt[T: Monoid]: Monoid[Option[T]] = new Monoid[Option[T]] {
+  implicit def monoidOpt[T: Semigroup]: Monoid[Option[T]] = new Monoid[Option[T]] {
     override def empty: Option[T] = None
 
     override def combine(aOpt: Option[T], bOpt: Option[T]): Option[T] = Semigroup.semigroupOpt(implicitly(Semigroup[T])).combine(aOpt, bOpt)
@@ -53,12 +64,44 @@ trait MonoidInstance {
     override def combine(a: (T1, T2), b: (T1, T2)): (T1, T2) = Semigroup.semigroupTuple2(e1, e2).combine(a, b)
   }
 
-  implicit def monoidMap[T1, T2](implicit e2: Monoid[T2]): Monoid[Map[T1, T2]] = new Monoid[Map[T1, T2]] {
+  implicit def monoidMap[T1, T2](implicit e2: Semigroup[T2]): Monoid[Map[T1, T2]] = new Monoid[Map[T1, T2]] {
     override def empty: Map[T1, T2] = Map.empty
 
     override def combine(a: Map[T1, T2], b: Map[T1, T2]): Map[T1, T2] = Semigroup.semigroupMap(e2).combine(a, b)
   }
 
+  //exercise 10.1
+  val monoidIntMultiplication: Monoid[Int] = new Monoid[Int] {
+    override def empty: Int = 1
+
+    override def combine(a: Int, b: Int): Int = a * b
+  }
+
+  val monoidOrBoolean: Monoid[Boolean] = new Monoid[Boolean] {
+    override def empty: Boolean = false
+
+    override def combine(a: Boolean, b: Boolean): Boolean = a || b
+  }
+
+  val monoidAndBoolean: Monoid[Boolean] = new Monoid[Boolean] {
+    override def empty: Boolean = true
+
+    override def combine(a: Boolean, b: Boolean): Boolean = a && b
+  }
+  //exercise 10.3
+
+  implicit def monoidEndoFunction[T]: Monoid[T => T] = new Monoid[T => T] {
+    override def empty: T => T = x => x
+
+    override def combine(a: T => T, b: T => T): T => T = a.andThen(b)
+  }
+
+
+  implicit def monoidList[T]: Monoid[List[T]] = new Monoid[List[T]] {
+    override def empty: List[T] = Nil
+
+    override def combine(a: List[T], b: List[T]): List[T] = Semigroup.semigroupList[T].combine(a, b)
+  }
 }
 
 trait MonoidLaws {

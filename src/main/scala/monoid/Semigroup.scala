@@ -21,7 +21,18 @@ trait SemigroupInstance {
 
   implicit def semigroupSeq[T]: Semigroup[Seq[T]] = (a: Seq[T], b: Seq[T]) => a ++ b
 
-  implicit def semigroupList[T]: Semigroup[List[T]] = (a: List[T], b: List[T]) => a ++ b
+  implicit def semigroupList[T]: Semigroup[List[T]] = (a: List[T], b: List[T]) => {
+
+    def tailF(aInv: List[T], b: List[T]): List[T] = {
+      aInv match {
+        case ::(head, next) => tailF(next, head :: b)
+        case Nil => b
+      }
+    }
+
+    tailF(a.reverse, b)
+  }
+
 
   private def combineOpt[T: Semigroup](a: T, bOpt: Option[T]): T = {
     bOpt match {

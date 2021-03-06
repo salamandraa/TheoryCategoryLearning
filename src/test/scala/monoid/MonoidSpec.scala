@@ -33,12 +33,30 @@ class MonoidSpec extends AnyFlatSpec with should.Matchers with MonoidLaws {
     identityLaw(Map("a" -> 1, "b" -> 2, "a" -> 3)) shouldBe true
     compositionLaw(Map("a" -> 1), Map("b" -> 2, "a" -> 10), Map("a" -> 3)) shouldBe true
 
+    identityLaw(2)(Monoid.monoidIntMultiplication) shouldBe true
+    compositionLaw(2, 3, 4)(Monoid.monoidIntMultiplication) shouldBe true
+
+
+    identityLaw(true)(Monoid.monoidOrBoolean) shouldBe true
+    identityLaw(false)(Monoid.monoidOrBoolean) shouldBe true
+    compositionLaw(true, false, false)(Monoid.monoidOrBoolean) shouldBe true
+    compositionLaw(false, true, true)(Monoid.monoidOrBoolean) shouldBe true
+
+    identityLaw(true)(Monoid.monoidAndBoolean) shouldBe true
+    identityLaw(false)(Monoid.monoidAndBoolean) shouldBe true
+    compositionLaw(true, false, false)(Monoid.monoidAndBoolean) shouldBe true
+    compositionLaw(false, true, true)(Monoid.monoidAndBoolean) shouldBe true
+
+    identityLawLeft((x: Int) => x + 2).apply(10) shouldBe identityLawRight((x: Int) => x + 2).apply(10)
+    compositionLawLeft((x: Int) => x + 2, (x: Int) => x + 10, (x: Int) => x * 100).apply(10) shouldBe compositionLawRight((x: Int) => x + 2, (x: Int) => x + 10, (x: Int) => x * 100).apply(10)
+
   }
 
   it should "check diffrent types" in {
     Monoid[Int].combine(1, 2) shouldBe 3
     Monoid[String].combine("1", "2") shouldBe "12"
     Monoid[Seq[Int]].combine(Seq(1), Seq(2)) shouldBe Seq(1, 2)
+    Monoid[List[Int]].combine(List(1, 2), List(3, 4)) shouldBe Seq(1, 2, 3, 4)
     Monoid[Seq[Seq[Int]]].combine(Seq(Seq(1), Seq(3)), Seq(Seq(2))) shouldBe Seq(Seq(1), Seq(3), Seq(2))
     Monoid[Option[Int]].combine(Some(1), Some(2)) shouldBe Some(3)
     Monoid[Option[Int]].combine(Some(1), None) shouldBe Some(1)
@@ -49,6 +67,13 @@ class MonoidSpec extends AnyFlatSpec with should.Matchers with MonoidLaws {
     Monoid[Seq[(Int, String)]].combine(Seq(1 -> "1"), Seq(2 -> "2")) shouldBe Seq(1 -> "1", 2 -> "2")
     Monoid.combineAll(Seq("1", "2", "3")) shouldBe "123"
     Monoid.combineAll(Seq(1, 2, 3)) shouldBe 6
+
+    val l1: IndexedSeq[Int] = List(1, 2, 3, 4, 5).toIndexedSeq
+    l1.foldMapV(x => x) should be(15)
+    l1.foldMapV(i => i.toString) should be("12345")
+    l1.foldMapV(i => (i, i.toString)) should be(15 -> "12345")
+    List(1, 2).toIndexedSeq.foldMapV(i => (i, i.toString)) should be(3 -> "12")
+
   }
 
   it should "test from https://www.scala-exercises.org/cats/monoid" in {
