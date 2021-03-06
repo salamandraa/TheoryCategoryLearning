@@ -7,14 +7,22 @@ trait Foldable[F[_]] {
 
   def foldLeft[A, B](fa: F[A], zero: B)(f: (B, A) => B): B
 
-  def fold[A](fa: F[A])(implicit S: Semigroup[A]): A
-
   def foldMap[A, B](fa: F[A])(f: A => B)(implicit mb: Monoid[B]): B
 
-  def concatenate[A](fa: F[A])(implicit ma: Monoid[A]): A = foldLeft(fa, ma.empty)(ma.combine)
+  def fold[A](fa: F[A])(implicit ma: Monoid[A]): A = foldLeft(fa, ma.empty)(ma.combine)
 
   //EXERCISE 10.15
   def toList[A](fa: F[A]): List[A]
+
+  def find[A](fa: F[A])(f: A => Boolean): Option[A] = foldLeft(fa, Option.empty[A])((b, a) => b.orElse(Some(a).filter(f)))
+
+  def exists[A](fa: F[A])(f: A => Boolean): Boolean = foldLeft(fa, false)((b, a) => b || f(a))
+
+  def forall[A](fa: F[A])(f: A => Boolean): Boolean = foldLeft(fa, true)((b, a) => b && f(a))
+
+  def filter_[A](fa: F[A])(f: A => Boolean): List[A] = foldRight(fa, List.empty[A])((a, b) => if (f(a)) a :: b else b)
+
+  def isEmpty[A](fa: F[A]): Boolean = foldLeft(fa, true)((_, _) => false)
 }
 
 object Foldable extends FoldableInstance {
@@ -37,9 +45,6 @@ trait FoldableInstance {
       case Nil => zero
     }
 
-
-    override def fold[A](fa: List[A])(implicit S: Semigroup[A]): A = fa.reduce(S.combine)
-
     override def foldMap[A, B](fa: List[A])(f: A => B)(implicit mb: Monoid[B]): B = fa.foldLeft(mb.empty) { case (l, r) => mb.combine(l, f(r)) }
 
     override def toList[A](fa: List[A]): List[A] = fa
@@ -49,9 +54,6 @@ trait FoldableInstance {
     override def foldRight[A, B](fa: Seq[A], zero: B)(f: (A, B) => B): B = fa.foldRight(zero)(f)
 
     override def foldLeft[A, B](fa: Seq[A], zero: B)(f: (B, A) => B): B = fa.foldLeft(zero)(f)
-
-
-    override def fold[A](fa: Seq[A])(implicit S: Semigroup[A]): A = fa.reduce(S.combine)
 
     override def foldMap[A, B](fa: Seq[A])(f: A => B)(implicit mb: Monoid[B]): B = fa.map(f).fold(mb.empty)(mb.combine)
 
@@ -68,12 +70,6 @@ trait FoldableInstance {
     override def foldLeft[A, B](fa: Tree[A], zero: B)(f: (B, A) => B): B = fa match {
       case Leaf(value) => f(zero, value)
       case Branch(left, right) => foldLeft(left, foldLeft(right, zero)(f))(f)
-    }
-
-
-    override def fold[A](fa: Tree[A])(implicit S: Semigroup[A]): A = fa match {
-      case Leaf(value) => value
-      case Branch(left, right) => S.combine(fold(left), fold(right))
     }
 
     override def foldMap[A, B](fa: Tree[A])(f: A => B)(implicit mb: Monoid[B]): B = fa match {
@@ -98,8 +94,6 @@ trait FoldableInstance {
       case Some(value) => f(zero, value)
       case None => zero
     }
-
-    override def fold[A](fa: Option[A])(implicit S: Semigroup[A]): A = fa.get
 
     override def foldMap[A, B](fa: Option[A])(f: A => B)(implicit mb: Monoid[B]): B = {
       fa match {
