@@ -27,6 +27,9 @@ object Monoid extends MonoidInstance {
     }
   }
 
+  //  EXERCISE 10.18
+  def bag[A](as: IndexedSeq[A]): Map[A, Int] = Foldable[Seq].foldMap(as)(x => Map(x -> 1))
+
 }
 
 trait MonoidInstance {
@@ -101,6 +104,13 @@ trait MonoidInstance {
     override def empty: List[T] = Nil
 
     override def combine(a: List[T], b: List[T]): List[T] = Semigroup.semigroupList[T].combine(a, b)
+  }
+
+  //  EXERCISE 10.17
+  implicit def functionMonoid[A, B](implicit mb: Monoid[B]): Monoid[A => B] = new Monoid[A => B] {
+    override def empty: A => B = _ => mb.empty
+
+    override def combine(a: A => B, b: A => B): A => B = x => mb.combine(a(x), b(x))
   }
 }
 

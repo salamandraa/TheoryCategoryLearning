@@ -50,6 +50,9 @@ class MonoidSpec extends AnyFlatSpec with should.Matchers with MonoidLaws {
     identityLawLeft((x: Int) => x + 2).apply(10) shouldBe identityLawRight((x: Int) => x + 2).apply(10)
     compositionLawLeft((x: Int) => x + 2, (x: Int) => x + 10, (x: Int) => x * 100).apply(10) shouldBe compositionLawRight((x: Int) => x + 2, (x: Int) => x + 10, (x: Int) => x * 100).apply(10)
 
+    identityLawLeft((x: Int) => (x + 2).toString).apply(10) shouldBe identityLawRight((x: Int) => (x + 2).toString).apply(10)
+    compositionLawLeft((x: Int) => (x + 2).toString, (x: Int) => (x + 10).toString, (x: Int) => (x * 100).toString).apply(10) shouldBe compositionLawRight((x: Int) => (x + 2).toString, (x: Int) => (x + 10).toString, (x: Int) => (x * 100).toString).apply(10)
+
   }
 
   it should "check diffrent types" in {
@@ -74,6 +77,7 @@ class MonoidSpec extends AnyFlatSpec with should.Matchers with MonoidLaws {
     l1.foldMapV(i => (i, i.toString)) should be(15 -> "12345")
     List(1, 2).toIndexedSeq.foldMapV(i => (i, i.toString)) should be(3 -> "12")
 
+    bag(Vector("a", "rose", "is", "a", "rose")) shouldBe Map("a" -> 2, "rose" -> 2, "is" -> 1)
   }
 
   it should "test from https://www.scala-exercises.org/cats/monoid" in {

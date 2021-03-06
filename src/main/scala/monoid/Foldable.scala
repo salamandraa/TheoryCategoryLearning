@@ -37,6 +37,16 @@ trait FoldableInstance {
     override def toList[A](fa: List[A]): List[A] = fa
   }
 
+  implicit val foldableSeq: Foldable[Seq] = new Foldable[Seq] {
+    override def foldRight[A, B](fa: Seq[A])(zero: B)(f: (A, B) => B): B = fa.foldRight(zero)(f)
+
+    override def foldLeft[A, B](fa: Seq[A])(zero: B)(f: (B, A) => B): B = fa.foldLeft(zero)(f)
+
+    override def foldMap[A, B](fa: Seq[A])(f: A => B)(implicit mb: Monoid[B]): B = fa.map(f).fold(mb.empty)(mb.combine)
+
+    override def toList[A](fa: Seq[A]): List[A] = fa.toList
+  }
+
   //    EXERCISE 10.13
   implicit val foldableTree: Foldable[Tree] = new Foldable[Tree] {
     override def foldRight[A, B](fa: Tree[A])(zero: B)(f: (A, B) => B): B = fa match {
@@ -46,7 +56,7 @@ trait FoldableInstance {
 
     override def foldLeft[A, B](fa: Tree[A])(zero: B)(f: (B, A) => B): B = fa match {
       case Leaf(value) => f(zero, value)
-      case Branch(left, right) => foldLeft(left)(foldLeft(right)(zero)(f))(f)
+      case Branch(left, right) => foldLeft(right)(foldLeft(left)(zero)(f))(f)
     }
 
 
