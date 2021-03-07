@@ -9,6 +9,21 @@ trait Monad[M[_]] {
 
   def map[A, B](ma: M[A])(f: A => B): M[B] = flatMap(ma)(x => pure(f(x)))
 
+  def map2[A, B, C](fa: M[A], fb: M[B])(f: (A, B) => C): M[C] = flatMap(fa)(a => map(fb)(b => f(a, b)))
+
+  def map3[A, B, C, D](fa: M[A], fb: M[B], fc: M[C])(f: (A, B, C) => D): M[D] = flatMap(fa)(a => map2(fb, fc)((b, c) => f(a, b, c)))
+
+  def map4[A, B, C, D, E](fa: M[A], fb: M[B], fc: M[C], fd: M[D])(f: (A, B, C, D) => E): M[E] = flatMap(fa)(a => map3(fb, fc, fd)((b, c, d) => f(a, b, c, d)))
+
+  def sequence[A](lma: List[M[A]]): M[List[A]] = lma match {
+    case head :: tail => flatMap(head)(headA => map(sequence(tail))(tailA => headA :: tailA))
+    case Nil => pure(Nil)
+  }
+
+  def traverse[A, B](la: List[A])(f: A => M[B]): M[List[B]] = la match {
+    case head :: tail => flatMap(f(head))(headB => map(traverse(tail)(f))(tailB => headB :: tailB))
+    case Nil => pure(Nil)
+  }
 }
 
 object Monad extends MonadInstance {
