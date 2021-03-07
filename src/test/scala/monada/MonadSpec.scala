@@ -1,5 +1,6 @@
 package monada
 
+import monoid.Monoid
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
@@ -23,12 +24,19 @@ class MonadSpec extends AnyFlatSpec with should.Matchers {
     Monad[Option].sequence(List(None, Some(2), Some(3))) shouldBe None
     Monad[Option].sequence(List(Some(1), None, Some(3))) shouldBe None
     Monad[Option].sequence(List(Some(1), Some(2), None)) shouldBe None
+    Monad[Option].sequence(List(None, None, None)) shouldBe None
 
     Monad[Option].traverse(List(1, 2, 3))(Some(_)) shouldBe Some(List(1, 2, 3))
     Monad[Option].traverse(List(1, 2, 3))(x => if (x == 1) None else Some(x)) shouldBe None
     Monad[Option].traverse(List(1, 2, 3))(x => if (x == 2) None else Some(x)) shouldBe None
     Monad[Option].traverse(List(1, 2, 3))(x => if (x == 3) None else Some(x)) shouldBe None
     Monad[Option].traverse(List(1, 2, 3))(x => if (x == 4) None else Some(x)) shouldBe Some(List(1, 2, 3))
+
+    Monoid.combineAll(List(Option(1), Some(2), Some(3))) shouldBe Some(6)
+    Monoid.combineAll(List(None, Some(2), Some(3))) shouldBe Some(5)
+    Monoid.combineAll(List(Some(1), None, Some(3))) shouldBe Some(4)
+    Monoid.combineAll(List(Some(1), Some(2), None)) shouldBe Some(3)
+    Monoid.combineAll(List(Option.empty[Int], None, None)) shouldBe None
 
   }
 
