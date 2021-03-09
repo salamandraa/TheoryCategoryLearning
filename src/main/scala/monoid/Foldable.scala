@@ -2,6 +2,8 @@ package monoid
 
 import data.{Branch, Leaf, Tree}
 
+import scala.annotation.tailrec
+
 trait Foldable[F[_]] {
   def foldRight[A, B](fa: F[A], zero: B)(f: (A, B) => B): B
 
@@ -32,16 +34,11 @@ object Foldable extends FoldableInstance {
 trait FoldableInstance {
   //  EXERCISE 10.12
   implicit val foldableList: Foldable[List] = new Foldable[List] {
-    override def foldRight[A, B](fa: List[A], zero: B)(f: (A, B) => B): B = fa match {
-      case head :: tail => f(head, foldRight(tail, zero)(f))
-      case Nil => zero
-    }
+    override def foldRight[A, B](fa: List[A], zero: B)(f: (A, B) => B): B = foldLeft(fa.reverse, zero)((b, a) => f(a, b))
 
-
-    override def foldLeft[A, B](fa: List[A], zero: B)(f: (B, A) => B): B = foldLeftPrivate(fa.reverse, zero)(f)
-
-    private def foldLeftPrivate[A, B](fa: List[A], zero: B)(f: (B, A) => B): B = fa match {
-      case head :: tail => f(foldLeftPrivate(tail, zero)(f), head)
+    @tailrec
+    override def foldLeft[A, B](fa: List[A], zero: B)(f: (B, A) => B): B = fa match {
+      case head :: tail => foldLeft(tail, f(zero, head))(f)
       case Nil => zero
     }
 
@@ -69,7 +66,7 @@ trait FoldableInstance {
 
     override def foldLeft[A, B](fa: Tree[A], zero: B)(f: (B, A) => B): B = fa match {
       case Leaf(value) => f(zero, value)
-      case Branch(left, right) => foldLeft(left, foldLeft(right, zero)(f))(f)
+      case Branch(left, right) => foldLeft(right, foldLeft(left, zero)(f))(f)
     }
 
     override def foldMap[A, B](fa: Tree[A])(f: A => B)(implicit mb: Monoid[B]): B = fa match {

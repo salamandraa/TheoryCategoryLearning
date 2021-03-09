@@ -15,14 +15,23 @@ trait Monad[M[_]] {
 
   def map4[A, B, C, D, E](fa: M[A], fb: M[B], fc: M[C], fd: M[D])(f: (A, B, C, D) => E): M[E] = flatMap(fa)(a => map3(fb, fc, fd)((b, c, d) => f(a, b, c, d)))
 
-  def sequence[A](lma: List[M[A]]): M[List[A]] = lma match {
-    case head :: tail => flatMap(head)(headA => map(sequence(tail))(tailA => headA :: tailA))
-    case Nil => pure(Nil)
+  def sequence[A](lma: List[M[A]]): M[List[A]] = {
+    map(lma.foldLeft(pure(List.empty[A]))((mListA, mA) => flatMap(mA)(a => map(mListA)(listA => a :: listA))))(_.reverse)
+    //    lma match {
+    //    case headM :: tailM => flatMap(sequence(tailM))(tailA => map(headM)(headA => headA :: tailA))
+    //    //    case headM :: tailM => flatMap(headM)(headA => map(sequence(tailM))(tailA => headA :: tailA))
+    //    case Nil => pure(Nil)
+    //  }
   }
 
-  def traverse[A, B](la: List[A])(f: A => M[B]): M[List[B]] = la match {
-    case head :: tail => flatMap(f(head))(headB => map(traverse(tail)(f))(tailB => headB :: tailB))
-    case Nil => pure(Nil)
+
+  def traverse[A, B](la: List[A])(f: A => M[B]): M[List[B]] = {
+    map(la.foldLeft(pure(List.empty[B]))((mListB, a) => flatMap(f(a))(b => map(mListB)(listB => b :: listB))))(_.reverse)
+    //    la match {
+    //      case headA :: tailA => flatMap(traverse(tailA)(f))(tailB => map(f(headA))(headB => headB :: tailB))
+    //      //    case headA :: tailA => flatMap(f(headA))(headB => map(traverse(tailA)(f))(tailB => headB :: tailB))
+    //      case Nil => pure(Nil)
+    //    }
   }
 }
 
