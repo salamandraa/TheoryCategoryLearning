@@ -33,6 +33,19 @@ trait Monad[M[_]] {
     //      case Nil => pure(Nil)
     //    }
   }
+
+  //  EXERCISE 11.4
+  def replicateM[A](n: Int, ma: M[A]): M[List[A]] = map(ma)(a => List.fill(n)(a))
+
+  //  EXERCISE 11.5
+  def product[A, B](ma: M[A], mb: M[B]): M[(A, B)] = flatMap(ma)(a => map(mb)(b => a -> b))
+
+  //  EXERCISE 11.6
+  def filterM[A](ms: List[A])(f: A => M[Boolean]): M[List[A]] = {
+    val fun: A => M[(A, Boolean)] = (x: A) => map(f(x))(boolean => x -> boolean)
+    map(traverse(ms)(fun))(listPair => listPair.filter(_._2).map(_._1))
+  }
+
 }
 
 object Monad extends MonadInstance {

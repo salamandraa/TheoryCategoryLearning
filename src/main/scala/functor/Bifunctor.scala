@@ -33,6 +33,11 @@ object Bifunctor extends BifunctorInstance {
   }
 
   def apply[F[_, _]](implicit bifunctor: Bifunctor[F]): Bifunctor[F] = bifunctor
+
+  implicit class PairExtended[F[_, _] : Bifunctor, A, B](fab: F[A, B]) {
+    def bimap[C, D](f: A => C, g: B => D): F[C, D] = Bifunctor[F].bimap(fab)(f, g)
+  }
+
 }
 
 trait BifunctorInstance {
