@@ -10,4 +10,4 @@ libraryDependencies ++= Seq(
  "org.scalactic" %% "scalactic" % "3.2.0",
    "org.scalatest" %% "scalatest" % "3.2.0" % "test"
 )
-resolvers += "Artima Maven Repository" at "http://repo.artima.com/releases"
+resolvers += "Artima Maven Repository" at "https://repo.artima.com/releases"
