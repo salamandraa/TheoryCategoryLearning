@@ -44,7 +44,7 @@ class FoldableSpec extends AnyFlatSpec with should.Matchers {
     //    val lazyResult = Foldable[List].foldRight(List(1, 2, 3), Now(0))((x, rest) => Later(x + rest.value))
     //    lazyResult.value should be()
 
-    cats.Foldable[List].fold(List("a", "b", "c")) should be("abc")
+    Foldable[List].fold(List("a", "b", "c")) should be("abc")
     Foldable[List].fold(List(1, 2, 3)) should be(6)
 
     Foldable[List].foldMap(List("a", "b", "c"))(_.length) should be(3)
@@ -86,8 +86,8 @@ class FoldableSpec extends AnyFlatSpec with should.Matchers {
 
     //
 
-    cats.Foldable[List].isEmpty(List(1, 2, 3)) should be(false)
-    cats.Foldable[List].isEmpty(List()) should be(true)
+    Foldable[List].isEmpty(List(1, 2, 3)) should be(false)
+    Foldable[List].isEmpty(List()) should be(true)
     //        Foldable[List].dropWhile_(List(1, 2, 3))(_ < 2) should be()
     //        Foldable[List].takeWhile_(List(1, 2, 3))(_ < 2) should be()
   }

@@ -8,8 +8,6 @@ trait Profunctor[P[_, _]] {
   def rmap[B, C, D](pbc: P[B, C])(g: C => D): P[B, D] = dimap(pbc)(identity[B])(g)
 }
 
-import cats.Functor
-
 object Profunctor extends ProfunctorInstance {
   def apply[P[_, _]](implicit profunctor: Profunctor[P]): Profunctor[P] = profunctor
 }
