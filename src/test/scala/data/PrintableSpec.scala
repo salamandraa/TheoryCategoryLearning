@@ -9,8 +9,6 @@ class PrintableSpec extends AnyFlatSpec with should.Matchers {
 
   import PrintableSyntax._
 
-  final case class Cat(name: String, age: Int, color: String)
-
   implicit val printableCat: Printable[Cat] = new Printable[Cat] {
     override def format(value: Cat): String = s"${Printable.format(value.name)} is a ${value.age.format} year-old ${Printable.format(value.color)} cat."
   }
