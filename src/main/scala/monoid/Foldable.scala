@@ -4,7 +4,7 @@ import data.{Branch, Leaf, Tree}
 
 import scala.annotation.tailrec
 
-trait Foldable[F[_]] {
+trait Foldable[-F[_]] {
   def foldRight[A, B](fa: F[A], zero: B)(f: (A, B) => B): B
 
   def foldLeft[A, B](fa: F[A], zero: B)(f: (B, A) => B): B
