@@ -47,6 +47,13 @@ trait MonoidInstance {
     override def combine(a: String, b: String): String = Semigroup.semigroupString.combine(a, b)
   }
 
+
+  implicit def monoidSet[T]: Monoid[Set[T]] = new Monoid[Set[T]] {
+    override def empty: Set[T] = Set.empty
+
+    override def combine(a: Set[T], b: Set[T]): Set[T] = a union b
+  }
+
   implicit def monoidSeq[T]: Monoid[Seq[T]] = new Monoid[Seq[T]] {
     override def empty: Seq[T] = Seq.empty[T]
 
@@ -111,6 +118,20 @@ trait MonoidInstance {
     override def empty: A => B = _ => mb.empty
 
     override def combine(a: A => B, b: A => B): A => B = x => mb.combine(a(x), b(x))
+  }
+
+  implicit val monoidDouble: Monoid[Double] = new Monoid[Double] {
+    override def empty: Double = 0.0
+
+    override def combine(a: Double, b: Double): Double = a + b
+  }
+
+  case class Order(totalCost: Double, quantity: Double)
+
+  implicit val monoidOrder: Monoid[Order] = new Monoid[Order] {
+    override def empty: Order = Order(Monoid[Double].empty, Monoid[Double].empty)
+
+    override def combine(a: Order, b: Order): Order = Order(Monoid[Double].combine(a.totalCost, b.totalCost), Monoid[Double].combine(a.quantity, b.quantity))
   }
 }
 
