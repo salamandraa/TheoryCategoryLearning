@@ -2,6 +2,8 @@ package monoid
 
 trait Semigroup[T] {
   def combine(a: T, b: T): T
+
+  def imap[R](f: T => R, fInv: R => T): Semigroup[R] = (a: R, b: R) => f(combine(fInv(a), fInv(b)))
 }
 
 object Semigroup extends SemigroupInstance {

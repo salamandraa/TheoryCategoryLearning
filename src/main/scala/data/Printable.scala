@@ -14,6 +14,11 @@ object Printable {
 
   implicit val printableInt: Printable[Int] = (value: Int) => value.toString
   implicit val printableString: Printable[String] = (value: String) => value
+
+  //this is contravarint functor
+  implicit def printableBox[A](implicit printable: Printable[A]): Printable[Box[A]] = new Printable[Box[A]] {
+    override def format(value: Box[A]): String = printable.format(value.value)
+  }
 }
 
 object PrintableSyntax {

@@ -1,5 +1,6 @@
 package functor
 
+import data.{Box, Printable}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
 
@@ -30,6 +31,14 @@ class ContravariantFunctorSpec extends AnyFlatSpec with should.Matchers with Con
 
     val orderingInt: Ordering[Int] = ContravariantFunctor[Ordering].contramap(Ordering.String)((x: Int) => x.toString)
     List(10, 1, 3, 20).sorted(orderingInt) shouldBe List(1, 10, 20, 3)
+
+    Printable.format(Box(10)) shouldBe "10"
+    Printable.format(Box("hello world")) shouldBe "hello world"
+
+    def printableBox2[T](implicit printable: Printable[T]): Printable[Box[T]] = ContravariantFunctor[Printable].contramap(printable)((x: Box[T]) => x.value)
+
+    printableBox2[Int].format(Box(10)) shouldBe "10"
+    printableBox2[String].format(Box("hello world")) shouldBe "hello world"
   }
 
 }

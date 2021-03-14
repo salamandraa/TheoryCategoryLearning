@@ -1,6 +1,7 @@
 package functor
 
 import data.Op.Op
+import data.{Box, Printable}
 
 trait ContravariantFunctor[C[_]] {
   def contramap[A, B](c: C[A])(f: B => A): C[B]
@@ -16,12 +17,16 @@ trait ContravariantInstance {
   }
 
 
-  implicit def functorOrdering[T]: ContravariantFunctor[Ordering] = new ContravariantFunctor[Ordering[*]] {
+  implicit val contravariantFunctorOrdering: ContravariantFunctor[Ordering] = new ContravariantFunctor[Ordering[*]] {
     override def contramap[A, B](c: Ordering[A])(f: B => A): Ordering[B] = c.on(f)
   }
 
-  implicit def functorEquiv[T]: ContravariantFunctor[Equiv] = new ContravariantFunctor[Equiv[*]] {
+  implicit val contravariantFunctorEquiv: ContravariantFunctor[Equiv] = new ContravariantFunctor[Equiv[*]] {
     override def contramap[A, B](c: Equiv[A])(f: B => A): Equiv[B] = Equiv.fromFunction[B] { case (l, r) => c.equiv(f(l), f(r)) }
+  }
+
+  implicit val contravariantFunctorPrintable: ContravariantFunctor[Printable] = new ContravariantFunctor[Printable] {
+    override def contramap[A, B](c: Printable[A])(f: B => A): Printable[B] = (value: B) => c.format(f(value))
   }
 }
 

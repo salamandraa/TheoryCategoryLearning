@@ -1,9 +1,9 @@
 package functor
 
-import data.Const
+import data.{Branch, Const, Leaf, Reader, Tree}
 import data.Id.Id
-import data.Reader
 
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}
 
 trait Functor[F[_]] {
@@ -91,6 +91,17 @@ trait FunctorInstance {
     override def map[A, B](fa: Try[A])(f: A => B): Try[B] = fa match {
       case Failure(exception) => Failure(exception)
       case Success(value) => Success(f(value))
+    }
+  }
+
+  implicit def functorFuture(implicit ec: ExecutionContext): Functor[Future] = new Functor[Future] {
+    override def map[A, B](fa: Future[A])(f: A => B): Future[B] = fa.map(f)
+  }
+
+  implicit val functorTree: Functor[Tree] = new Functor[Tree] {
+    override def map[A, B](fa: Tree[A])(f: A => B): Tree[B] = fa match {
+      case Leaf(value) => Leaf(f(value))
+      case Branch(left, right) => Branch(map(left)(f), map(right)(f))
     }
   }
 }
