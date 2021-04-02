@@ -1,5 +1,7 @@
 package monoid
 
+import foldable.Foldable
+
 trait Monoid[T] extends Semigroup[T] {
   def empty: T
 

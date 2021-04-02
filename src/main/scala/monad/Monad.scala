@@ -1,4 +1,4 @@
-package monada
+package monad
 
 import data.Id.Id
 

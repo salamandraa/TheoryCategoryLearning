@@ -1,7 +1,7 @@
-package monada
+package monad
 
 import data.Tree
-import monoid.{Foldable, Monoid}
+import monoid.Monoid
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 

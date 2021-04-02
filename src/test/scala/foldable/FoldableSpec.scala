@@ -1,12 +1,11 @@
-package monoid
-
+package foldable
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
 
 class FoldableSpec extends AnyFlatSpec with should.Matchers {
 
-  import monoid.Foldable._
+  import foldable.Foldable._
 
 
   it should "check diffrent types" in {
