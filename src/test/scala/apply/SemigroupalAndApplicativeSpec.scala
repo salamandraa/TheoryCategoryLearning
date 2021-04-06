@@ -1,6 +1,8 @@
 package apply
 
-import cats.{Apply, Functor, Invariant, Monad}
+import cats.data.NonEmptyList
+import cats.{Applicative, Apply, Functor, Invariant, Monad}
+import data.Validation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 
@@ -164,6 +166,7 @@ class SemigroupalAndApplicativeSpec extends AnyFlatSpec with should.Matchers {
 
   Apply[Option].ap(Some((x: Int) => (x * 2).toString))(Some(10)) shouldBe Some("20")
   myApplyOption.ap(Some((x: Int) => (x * 2).toString))(Some(10)) shouldBe Some("20")
+  monad.Monad.toApplicative[Option].ap(Some((x: Int) => (x * 2).toString))(Some(10)) shouldBe Some("20")
 
   val myApplyList: Apply[List] = new Apply[List] {
     override def ap[A, B](ff: List[A => B])(fa: List[A]): List[B] = ff.flatMap(f => fa.map(a => f(a)))
@@ -174,7 +177,53 @@ class SemigroupalAndApplicativeSpec extends AnyFlatSpec with should.Matchers {
 
   Apply[List].ap(List((x: Int) => (x * 2).toString, (x: Int) => (x + 1).toString))(List(1, 2, 3)) shouldBe List("2", "4", "6", "2", "3", "4")
   myApplyList.ap(List((x: Int) => (x * 2).toString, (x: Int) => (x + 1).toString))(List(1, 2, 3)) shouldBe List("2", "4", "6", "2", "3", "4")
+  monad.Monad.toApplicative[List].ap(List((x: Int) => (x * 2).toString, (x: Int) => (x + 1).toString))(List(1, 2, 3)) shouldBe List("2", "2", "4", "3", "6", "4")
 
-  cats.instances.list
+
+  val validateError1: Validation[String, Int] = Validation.Failure(NonEmptyList("Error1", Nil))
+  val validateError23: Validation[String, Int] = Validation.Failure(NonEmptyList("Error2", "Error3" :: Nil))
+  val validateOk: Validation[String, Int] = Validation.Success(10)
+
+  import cats.syntax.apply._
+
+  (validateError1, validateError23).tupled shouldBe Validation.Failure(NonEmptyList("Error1", "Error2" :: "Error3" :: Nil))
+  (validateError23, validateOk).tupled shouldBe validateError23
+  (validateOk, validateError23).tupled shouldBe validateError23
+  (validateOk, validateOk).tupled shouldBe Validation.Success((10, 10))
+
+
+  //  EXERCISE 12.8
+
+  //  product
+  //  EXERCISE 12.9
+  //  cats.Applicative[Option].compose()
+
+
+  def compose[F[_], G[_]](implicit F: Applicative[F], G: Applicative[G]): Applicative[λ[α => F[G[α]]]] = {
+    new Applicative[Lambda[α => F[G[α]]]] {
+      override def pure[A](x: A): F[G[A]] = F.pure(G.pure(x))
+
+      override def ap[A, B](ff: F[G[A => B]])(fa: F[G[A]]): F[G[B]] = {
+        F.map2(ff, fa)((a, b) => G.ap(a)(b))
+      }
+
+      override def product[A, B](fa: F[G[A]], fb: F[G[B]]): F[G[(A, B)]] = F.map(F.product(fa, fb))(x => G.product(x._1, x._2))
+    }
+  }
+
+  import cats.Applicative
+
+  {
+    compose[List, Option].ap(List(Option((a: Int) => a + 11), Option((a: Int) => a * 3)))(List(Some(1), Some(13), Some(20))) shouldBe
+      (Applicative[List].compose[Option].ap(List(Option((a: Int) => a + 11), Option((a: Int) => a * 3)))(List(Some(1), Some(13), Some(20))))
+
+    println(compose[List, Option].ap(List(Option((a: Int) => a + 11), Option((a: Int) => a * 3)))(List(Some(1), Some(13), Some(20))))
+    println((Applicative[List].compose[Option].ap(List(Option((a: Int) => a + 11), Option((a: Int) => a * 3)))(List(Some(1), Some(13), Some(20)))))
+  }
+
+  {
+    compose[List, Option].ap(List(Option((a: Int) => a + 11), None))(List(Some(1), Some(13), Some(20))) shouldBe
+      (Applicative[List].compose[Option].ap(List(Option((a: Int) => a + 11), None))(List(Some(1), Some(13), Some(20))))
+  }
 
 }

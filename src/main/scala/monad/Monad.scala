@@ -1,15 +1,21 @@
 package monad
 
+import cats.Applicative
 import data.Id.Id
+import data.Reader
+import monad.Monad.ComposeMonad
 
 import scala.util.{Failure, Success, Try}
 
 trait Monad[M[_]] {
+  self =>
   def pure[A](value: => A): M[A]
 
   def flatMap[A, B](ma: M[A])(f: A => M[B]): M[B]
 
   def map[A, B](ma: M[A])(f: A => B): M[B] = flatMap(ma)(x => pure(f(x)))
+
+  def flatten[A](mma: M[M[A]]): M[A] = flatMap(mma)(identity)
 
   def map2[A, B, C](fa: M[A], fb: M[B])(f: (A, B) => C): M[C] = flatMap(fa)(a => map(fb)(b => f(a, b)))
 
@@ -48,10 +54,40 @@ trait Monad[M[_]] {
     map(traverse(ms)(fun))(listPair => listPair.filter(_._2).map(_._1))
   }
 
+  //  EXERCISE 12.11
+  //  Try to write compose on Monad . It’s not possible, but it is instructive to attempt it and
+  //    understand why this is the case.
+  def compose[G[_]](implicit monadG: Monad[G]): Monad[λ[α => M[G[α]]]] = new ComposeMonad[M, G] {
+    override def M: Monad[M] = self
+
+    override def G: Monad[G] = monadG
+  }
+
 }
 
 object Monad extends MonadInstance {
+
+  trait ComposeMonad[M[_], G[_]] extends Monad[λ[α => M[G[α]]]] {
+    def M: Monad[M]
+
+    def G: Monad[G]
+
+    override def pure[A](value: => A): M[G[A]] = M.pure(G.pure(value))
+
+    override def flatMap[A, B](ma: M[G[A]])(f: A => M[G[B]]): M[G[B]] = ??? //M.flatMap(ma)(ga => G.flatMap(ga)(a => f(a)) )
+  }
+
   def apply[M[_]](implicit e: Monad[M]): Monad[M] = e
+
+  //  EXERCISE 12.1
+  def toApplicative[M[_] : Monad]: Applicative[M] = new Applicative[M] {
+    override def pure[A](x: A): M[A] = Monad[M].pure(x)
+
+    override def ap[A, B](ff: M[A => B])(fa: M[A]): M[B] = {
+      val monad = Monad[M]
+      monad.flatMap(fa)(a => monad.map(ff)(f => f(a)))
+    }
+  }
 }
 
 trait MonadInstance {
@@ -86,10 +122,34 @@ trait MonadInstance {
     }
   }
 
-  implicit val monadId : Monad[Id] =  new Monad[Id] {
+  //  EXERCISE 11.17
+  implicit val monadId: Monad[Id] = new Monad[Id] {
     override def pure[A](value: => A): Id[A] = value
 
     override def flatMap[A, B](ma: Id[A])(f: A => Id[B]): Id[B] = f(ma)
+  }
+
+  //  EXERCISE 11.20
+  implicit def monadReader[T]: Monad[Reader[T, *]] = new Monad[Reader[T, *]] {
+    override def pure[A](value: => A): Reader[T, A] = Reader(_ => value)
+
+    override def flatMap[A, B](ma: Reader[T, A])(f: A => Reader[T, B]): Reader[T, B] = Reader {
+      t: T => f.compose(ma.fun).apply(t).fun(t)
+    }
+  }
+
+  implicit def monadEither[L]: Monad[Either[L, *]] = new Monad[Either[L, *]] {
+
+    override def pure[A](value: => A): Either[L, A] = Right(value)
+
+    override def flatMap[A, B](ma: Either[L, A])(f: A => Either[L, B]): Either[L, B] = ma.flatMap(f)
+  }
+
+  //  EXERCISE 12.5
+  def monadEither2[L]: Monad[Either[L, *]] = new Monad[({type f[x] = Either[L, x]})#f] {
+    override def pure[A](value: => A): Either[L, A] = Right(value)
+
+    override def flatMap[A, B](ma: Either[L, A])(f: A => Either[L, B]): Either[L, B] = ma.flatMap(f)
   }
 
 

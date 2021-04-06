@@ -1,6 +1,6 @@
 package monad
 
-import data.Tree
+import data.{Reader, Tree}
 import monoid.Monoid
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -72,4 +72,42 @@ class MonadSpec extends AnyFlatSpec with should.Matchers {
       override def pure[A](x: A): Tree[A] = Leaf(x)
     }
   }
+
+  it should "EXERCISE 11.7 Implement the Kleisli composition function compose ." in {
+
+    def compose[A, B, C, F[_] : Monad](f: A => F[B], g: B => F[C]): A => F[C] = (a: A) => implicitly[Monad[F]].flatMap(f(a))(g)
+
+    val f: Int => Option[Int] = (x: Int) => Some(x)
+    val g: Int => Option[Int] = (x: Int) => Some(10 * x)
+    val h: Int => Option[Int] = (x: Int) => Some(100 * x)
+    compose(compose(f, g), h) == compose(f, compose(g, h))
+
+    //    EXERCISE 11.8
+    //    compose and unit .
+    //    def flatMap[A, B, M[_]:Monad](ma: M[A])(f: A => M[B]): M[B] = compose((x:A) => implicitly[Monad[F]].pure(ma,f)
+
+    //    EXERCISE 11.12
+    //    There’s a third minimal set of monadic combinators: map , unit , and join . Implement
+    //    join in terms of flatMap .
+    def join[A, F[_] : Monad](mma: F[F[A]]): F[A] = implicitly[Monad[F]].flatMap(mma)(identity)
+
+    join(Option(Option(1))) shouldBe Option(1)
+    join(Option(Option.empty[Int])) shouldBe None
+    join(Option.empty[Option[Int]]) shouldBe None
+
+
+    //    EXERCISE 11.13
+    //    Implement either flatMap or compose in terms of join and map .
+
+    def flatMap[A, B, M[_] : Monad](ma: M[A])(f: A => M[B]): M[B] = implicitly[Monad[M]].flatten(implicitly[Monad[M]].map(ma)(f))
+
+    flatMap(Option(1))(x => Some(x + 1)) shouldBe Option(2)
+    flatMap(Option.empty[Int])(x => Some(x + 1)) shouldBe None
+
+    Monad[Reader[Int, *]].flatMap(Reader((x: Int) => x + 3))(a => Reader((x: Int) => (x * a).toString)).apply(10) shouldBe "130"
+
+    cats.data.Reader((x: Int) => x + 3).flatMap(a => cats.data.Reader((x: Int) => (x * a).toString)).apply(10) shouldBe "130"
+
+  }
+
 }
