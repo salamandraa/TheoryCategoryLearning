@@ -1,8 +1,8 @@
 package monad
 
 import cats.Applicative
-import data.Id.Id
-import data.Reader
+import data1.Id.Id
+import data1.Reader
 import monad.Monad.ComposeMonad
 
 import scala.util.{Failure, Success, Try}

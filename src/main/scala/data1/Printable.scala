@@ -1,6 +1,6 @@
-package data
+package data1
 
-import data.Printable.format
+import data1.Printable.format
 
 trait Printable[-A] {
   def format(value: A): String

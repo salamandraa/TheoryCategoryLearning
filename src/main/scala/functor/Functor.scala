@@ -1,7 +1,7 @@
 package functor
 
-import data.{Branch, Const, Leaf, Reader, Tree}
-import data.Id.Id
+import data1.{Branch, Const, Leaf, Reader, Tree}
+import data1.Id.Id
 
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success, Try}

@@ -1,4 +1,4 @@
-package data
+package data1
 
 import cats.Applicative
 import cats.data.NonEmptyList

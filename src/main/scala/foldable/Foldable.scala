@@ -1,6 +1,6 @@
 package foldable
 
-import data.{Branch, Leaf, Tree}
+import data1.{Branch, Leaf, Tree}
 import monoid.Monoid
 
 import scala.annotation.tailrec

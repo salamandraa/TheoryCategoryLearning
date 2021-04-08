@@ -1,6 +1,6 @@
 package monad
 
-import data.{Reader, Tree}
+import data1.{Reader, Tree}
 import monoid.Monoid
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
@@ -57,9 +57,9 @@ class MonadSpec extends AnyFlatSpec with should.Matchers {
       override def pure[A](x: A): Option[A] = Some(x)
     }
 
-    import data.Tree
-    import data.Leaf
-    import data.Branch
+    import data1.Tree
+    import data1.Leaf
+    import data1.Branch
     implicit val treeMonad: cats.Monad[Tree] = new cats.Monad[Tree] {
       override def flatMap[A, B](fa: Tree[A])(f: A => Tree[B]): Tree[B] = fa match {
         case Leaf(value) => f(value)

@@ -1,12 +1,12 @@
 package functor
 
-import data.{Box, Printable}
+import data1.{Box, Printable}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
 
 class ContravariantFunctorSpec extends AnyFlatSpec with should.Matchers with ContravariantFunctorLaws {
 
-  import data.Op.Op
+  import data1.Op.Op
 
   it should "laws" in {
     val op: Op[Int, String] = (x: String) => x.toInt

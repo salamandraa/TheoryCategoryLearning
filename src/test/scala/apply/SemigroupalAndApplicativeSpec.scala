@@ -1,8 +1,8 @@
 package apply
 
 import cats.data.NonEmptyList
-import cats.{Applicative, Apply, Functor, Invariant, Monad}
-import data.Validation
+import cats.{Applicative, Apply, Functor, Invariant, Monad, Traverse}
+import data1.Validation
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should
 

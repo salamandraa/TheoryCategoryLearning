@@ -1,8 +1,8 @@
 package functor
 
 
-import data.Id.Id
-import data.{Const, Reader}
+import data1.Id.Id
+import data1.{Const, Reader}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
 
@@ -24,7 +24,7 @@ class FunctorSpec extends AnyFlatSpec with should.Matchers with FunctorLaws {
     identityLawLeft((x: Double) => x.toInt.toString).apply(10.0) shouldBe identityLawRight((x: Double) => x.toInt.toString).apply(10.0)
     compositionLawLeft((x: Double) => x.toInt.toString)(_.toInt)(_.toLong).apply(10.0) shouldBe compositionLawRight((x: Double) => x.toInt.toString)(_.toInt)(_.toLong).apply(10.0)
 
-    import data.Id.Id
+    import data1.Id.Id
     identityLaw[Id, Int](10) shouldBe true
     compositionLaw[Id, Int, Double, String](10)(_.toDouble)(_.toString) shouldBe true
 

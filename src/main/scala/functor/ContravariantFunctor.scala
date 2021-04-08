@@ -1,7 +1,7 @@
 package functor
 
-import data.Op.Op
-import data.{Box, Printable}
+import data1.Op.Op
+import data1.{Box, Printable}
 
 trait ContravariantFunctor[C[_]] {
   def contramap[A, B](c: C[A])(f: B => A): C[B]

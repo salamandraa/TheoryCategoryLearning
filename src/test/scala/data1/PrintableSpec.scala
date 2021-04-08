@@ -1,4 +1,4 @@
-package data
+package data1
 
 import cats.Show
 import org.scalatest._
