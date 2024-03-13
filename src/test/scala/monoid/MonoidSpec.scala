@@ -3,7 +3,6 @@ package monoid
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers._
-import sun.awt.SunToolkit.OperationTimedOut
 
 class MonoidSpec extends AnyFlatSpec with should.Matchers with MonoidLaws {
 
